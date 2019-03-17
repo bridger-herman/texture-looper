@@ -30,6 +30,11 @@ function init() {
   });
 
   $('#crop-area').draggable({containment: 'parent'});
+
+  $('#crop-area').append($('<div/>', {class: 'crop-mask left'}));
+  $('#crop-area').append($('<div/>', {class: 'crop-mask right'}));
+  $('#crop-area').append($('<div/>', {class: 'crop-mask top'}));
+  $('#crop-area').append($('<div/>', {class: 'crop-mask bottom'}));
 }
 
 window.onload = init
