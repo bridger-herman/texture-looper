@@ -1,5 +1,6 @@
 body {
   overflow: hidden;
+  margin: 0;
 }
 
 #crop-area {
@@ -13,25 +14,46 @@ body {
 
 #image-to-crop {
   border: 1px solid black;
+  z-index: -1;
+}
+
+.ui {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 15vw;
+  height: 100vw;
+  background: #eee;
+  z-index: 1;
+  padding: 10px 20px;
+  margin: 0;
+}
+
+.ui * {
+  margin: 10px 5px;
 }
 
 .crop-mask {
   position: absolute;
   width: 200vw;
-  height: 100%;
   background: #1118;
+  z-index: 0;
 }
 .crop-mask.left {
   left: -200vw;
+  height: 100%;
 }
 .crop-mask.right {
   left: 100%;
+  height: 100%;
 }
 .crop-mask.top {
-  top: -100%;
+  top: -100vh;
   left: -100vw;
+  height: 100vh;
 }
 .crop-mask.bottom {
   top: 100%;
   left: -100vw;
+  height: 100vh;
 }

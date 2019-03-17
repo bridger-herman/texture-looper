@@ -3,13 +3,30 @@
   <head>
     <link rel="stylesheet" type="text/css" href="style.css">
     <meta charset="utf-8">
+    <title>Texture Looper</title>
 
   </head>
   <body>
     <img id="image-to-crop" src="#">
-      <div id="crop-area"></div>
+    <div id="crop-area"></div>
+
+    <div class="ui">
+      <ol>
+        <li>
+          <label for="file-upload">Upload an image texture:
+            <input type="file" id="file-upload" accept="image/*">
+          </label>
+          <li>
+            <p>Crop the image to your heart's content, using the interactive tool
+            on the left</p>
+          </li>
+          <li>
+            <p>Save your result</p>
+            <button id="save">Save Cropped Image</button>
+          </li>
+        </li>
+      </ol>
     </div>
-    <input type="file" id="file-upload">
 
     <script src="./jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
     <script src="./jquery-ui-1.12.1.custom/jquery-ui.js"></script>
