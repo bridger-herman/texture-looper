@@ -48,22 +48,37 @@ function init() {
   $('#crop-area').append($('<div/>', {class: 'crop-mask top'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask bottom'}));
 
-  // $('#crop-area').append($('<div/>', {class: 'resize-handle up left'}))
+  $('#crop-area').append($('<div/>', {class: 'resize-handle up left'}))
   // $('#crop-area').append($('<div/>', {class: 'resize-handle up right'}))
   // $('#crop-area').append($('<div/>', {class: 'resize-handle low left'}))
-  $('#crop-area').append($('<div/>', {class: 'resize-handle low right'}))
+  // $('#crop-area').append($('<div/>', {class: 'resize-handle low right'}))
 
   $('.resize-handle').draggable({scroll: false});
   setHandleContainment();
 
   // Resize the crop area based on current dragging
-  $('.resize-handle').on('drag', (evt, ui) => {
+  $('.resize-handle.low.right').on('drag', (evt, ui) => {
     let newSize = evt.clientY - $('#crop-area').offset().top;
     $('#crop-area').css({
       height: newSize,
       width: newSize,
     });
     ui.position.left = newSize - 10;
+    setCropContainment();
+    setHandleContainment();
+  });
+  $('.resize-handle.up.left').on('drag', (evt, ui) => {
+    let originalPosition = $('#crop-area').offset()
+    let newSize = $('#crop-area').height() - (evt.clientY - $('#crop-area').offset().top);
+    $('#crop-area').css({
+      height: newSize,
+      width: newSize,
+      left: evt.clientX,
+      top: evt.clientY,
+    });
+    ui.position.left = -10;
+    ui.position.top = -10;
+
     setCropContainment();
     setHandleContainment();
   });
