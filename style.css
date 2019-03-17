@@ -57,3 +57,23 @@ body {
   left: -100vw;
   height: 100vh;
 }
+
+.resize-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid white;
+  background: black;
+}
+.resize-handle.left {
+  left: -10px;
+}
+.resize-handle.right {
+  left: calc(100% - 10px);
+}
+.resize-handle.up {
+  top: -10px;
+}
+.resize-handle.low {
+  top: calc(100% - 10px);
+}

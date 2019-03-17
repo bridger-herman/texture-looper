@@ -8,6 +8,14 @@ function setCropBackground(data) {
   });
 }
 
+function setCropContainment() {
+  $('#crop-area').draggable('option', 'containment', '#image-to-crop');
+}
+
+function setHandleContainment() {
+  $('.resize-handle').draggable('option', 'containment', '#image-to-crop');
+}
+
 function init() {
   // Try to load the image url from storage (don't lose data over refresh)
   if (sessionStorage['imgData'] != null) {
@@ -32,19 +40,33 @@ function init() {
 
   let image = $('#image-to-crop');
   image.load(() => {
-    $('#crop-area').draggable({
-      containment: [
-        image.offset().left,
-        image.offset().top,
-        image.offset().left + image.width() - $('#crop-area').width(),
-        image.offset().top + image.height() - $('#crop-area').height(),
-      ],
-    });
+    $('#crop-area').draggable({scroll: false});
+    setCropContainment();
   });
   $('#crop-area').append($('<div/>', {class: 'crop-mask left'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask right'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask top'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask bottom'}));
+
+  // $('#crop-area').append($('<div/>', {class: 'resize-handle up left'}))
+  // $('#crop-area').append($('<div/>', {class: 'resize-handle up right'}))
+  // $('#crop-area').append($('<div/>', {class: 'resize-handle low left'}))
+  $('#crop-area').append($('<div/>', {class: 'resize-handle low right'}))
+
+  $('.resize-handle').draggable({scroll: false});
+  setHandleContainment();
+
+  // Resize the crop area based on current dragging
+  $('.resize-handle').on('drag', (evt, ui) => {
+    let newSize = evt.clientY - $('#crop-area').offset().top;
+    $('#crop-area').css({
+      height: newSize,
+      width: newSize,
+    });
+    ui.position.left = newSize - 10;
+    setCropContainment();
+    setHandleContainment();
+  });
 
   $('button#save').on('click', (evt) => {
     let canvas = document.createElement('canvas');
