@@ -1,4 +1,4 @@
-const TEST_IMG = './s3.png'
+let CROP_CANVAS = document.createElement('canvas');
 
 function setCropBackground(data) {
   $('#image-to-crop').attr('src', data);
@@ -10,6 +10,24 @@ function setCropBackground(data) {
 
 function setCropContainment() {
   $('#crop-area').draggable('option', 'containment', '#image-to-crop');
+}
+
+// Returns data URL to updated cropped image
+function getCroppedImage() {
+  let ctx = CROP_CANVAS.getContext('2d');
+  ctx.clearRect(0, 0, CROP_CANVAS.width, CROP_CANVAS.height);
+
+  let img = document.getElementById('image-to-crop');
+  let scaleFactorX = img.naturalWidth / img.width;
+  let scaleFactorY = img.naturalHeight / img.height;
+
+  let cropAreaHeight = $('#crop-area').height();
+  CROP_CANVAS.width = scaleFactorX * cropAreaHeight;
+  CROP_CANVAS.height = scaleFactorY * cropAreaHeight;
+
+  let offset = $('#crop-area').offset();
+  ctx.drawImage(img, scaleFactorX * -offset.left, scaleFactorY * -offset.top);
+  return CROP_CANVAS.toDataURL('image/png');
 }
 
 function init() {
@@ -34,30 +52,35 @@ function init() {
     reader.readAsDataURL(evt.target.files[0]);
   });
 
-  let image = $('#image-to-crop');
-  image.load(() => {
-    $('#crop-area').draggable({scroll: false, containment: '#image-to-crop'});
-  });
+  $('#crop-area').draggable({scroll: false, containment: '#image-to-crop'});
   $('#crop-area').append($('<div/>', {class: 'crop-mask left'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask right'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask top'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask bottom'}));
 
+  $('#crop-area').on('dragstart', (evt) => {
+    $('.crop-mask').css('background-image', 'none');
+  });
+  $('#crop-area').on('dragstop', (evt) => {
+    if (document.getElementById('show-repeat-preview').checked) {
+      $('.crop-mask').css('background-image', 'url(' + getCroppedImage() + ')');
+    } else {
+      $('.crop-mask').css('background-image', 'none');
+    }
+  });
+
+  // Set up the repeat preview checkbox
+  $('#show-repeat-preview').on('change', (evt) => {
+    if (evt.target.checked) {
+      $('.crop-mask').css('background-image', 'url(' + getCroppedImage() + ')');
+    } else {
+      $('.crop-mask').css('background-image', 'none');
+    }
+  });
+
+
   $('button#save').on('click', (evt) => {
-    let canvas = document.createElement('canvas');
-    let ctx = canvas.getContext('2d');
-
-    let img = document.getElementById('image-to-crop');
-    let scaleFactorX = img.naturalWidth / img.width;
-    let scaleFactorY = img.naturalHeight / img.height;
-
-    let cropAreaHeight = $('#crop-area').height();
-    canvas.width = scaleFactorX * cropAreaHeight;
-    canvas.height = scaleFactorY * cropAreaHeight;
-
-    let offset = $('#crop-area').offset();
-    ctx.drawImage(img, scaleFactorX * -offset.left, scaleFactorY * -offset.top);
-    let dataUrl = canvas.toDataURL('image/png');
+    let dataUrl = getCroppedImage();
 
     // Create a link and virtually click it to initiate download
     // https://stackoverflow.com/a/21210576
