@@ -3,6 +3,10 @@ body {
   margin: 0;
 }
 
+img {
+  font-size: 30pt;
+}
+
 #crop-area {
   border: 1px solid black;
   position: absolute;

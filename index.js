@@ -12,10 +12,6 @@ function setCropContainment() {
   $('#crop-area').draggable('option', 'containment', '#image-to-crop');
 }
 
-function setHandleContainment() {
-  $('.resize-handle').draggable('option', 'containment', '#image-to-crop');
-}
-
 function init() {
   // Try to load the image url from storage (don't lose data over refresh)
   if (sessionStorage['imgData'] != null) {
@@ -40,48 +36,12 @@ function init() {
 
   let image = $('#image-to-crop');
   image.load(() => {
-    $('#crop-area').draggable({scroll: false});
-    setCropContainment();
+    $('#crop-area').draggable({scroll: false, containment: '#image-to-crop'});
   });
   $('#crop-area').append($('<div/>', {class: 'crop-mask left'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask right'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask top'}));
   $('#crop-area').append($('<div/>', {class: 'crop-mask bottom'}));
-
-  $('#crop-area').append($('<div/>', {class: 'resize-handle up left'}))
-  // $('#crop-area').append($('<div/>', {class: 'resize-handle up right'}))
-  // $('#crop-area').append($('<div/>', {class: 'resize-handle low left'}))
-  // $('#crop-area').append($('<div/>', {class: 'resize-handle low right'}))
-
-  $('.resize-handle').draggable({scroll: false});
-  setHandleContainment();
-
-  // Resize the crop area based on current dragging
-  $('.resize-handle.low.right').on('drag', (evt, ui) => {
-    let newSize = evt.clientY - $('#crop-area').offset().top;
-    $('#crop-area').css({
-      height: newSize,
-      width: newSize,
-    });
-    ui.position.left = newSize - 10;
-    setCropContainment();
-    setHandleContainment();
-  });
-  $('.resize-handle.up.left').on('drag', (evt, ui) => {
-    let originalPosition = $('#crop-area').offset()
-    let newSize = $('#crop-area').height() - (evt.clientY - $('#crop-area').offset().top);
-    $('#crop-area').css({
-      height: newSize,
-      width: newSize,
-      left: evt.clientX,
-      top: evt.clientY,
-    });
-    ui.position.left = -10;
-    ui.position.top = -10;
-
-    setCropContainment();
-    setHandleContainment();
-  });
 
   $('button#save').on('click', (evt) => {
     let canvas = document.createElement('canvas');
@@ -100,6 +60,9 @@ function init() {
     let dataUrl = canvas.toDataURL('image/png');
     window.open(dataUrl);
   });
+
+  // Setup the resizing handles
+  initHandles();
 }
 
 window.onload = init
