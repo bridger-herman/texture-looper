@@ -1,8 +1,8 @@
 function resetHandles() {
   let cropArea = $('#crop-area');
-  $('.resize-handle').draggable('option', 'containment', '#image-to-crop');
   $('.resize-handle.low.right').offset({left: cropArea.offset().left + cropArea.width() - 10, top: cropArea.offset().top + cropArea.height() - 10});
   $('.resize-handle.up.left').offset({left: cropArea.offset().left - 10, top: cropArea.offset().top - 10});
+  $('.resize-handle').draggable('option', 'containment', '#image-to-crop');
 }
 
 function initHandles() {
@@ -22,8 +22,8 @@ function initHandles() {
       width: newSize,
     });
     ui.position.left = newSize - 10;
-    $('#crop-area').draggable('option', 'containment', '#image-to-crop');
     resetHandles();
+    $('#crop-area').draggable('option', 'containment', '#image-to-crop');
   });
   $('.resize-handle.up.left').on('drag', (evt, ui) => {
     let originalPosition = $('#crop-area').offset();
@@ -36,8 +36,8 @@ function initHandles() {
     });
     ui.position.left = -10;
     ui.position.top = -10;
-    $('#crop-area').draggable('option', 'containment', '#image-to-crop');
     resetHandles();
+    $('#crop-area').draggable('option', 'containment', '#image-to-crop');
   });
 
 }

@@ -58,7 +58,15 @@ function init() {
     let offset = $('#crop-area').offset();
     ctx.drawImage(img, scaleFactorX * -offset.left, scaleFactorY * -offset.top);
     let dataUrl = canvas.toDataURL('image/png');
-    window.open(dataUrl);
+
+    // Create a link and virtually click it to initiate download
+    // https://stackoverflow.com/a/21210576
+    var link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = 'texture.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   });
 
   // Setup the resizing handles
