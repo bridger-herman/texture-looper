@@ -1,3 +1,5 @@
+let EXPORT_WIDTH = 1024;
+let EXPORT_HEIGHT = 1024;
 let CROP_CANVAS = document.createElement('canvas');
 
 function setCropBackground(data) {
@@ -80,7 +82,24 @@ function init() {
 
 
   $('button#save').on('click', (evt) => {
-    let dataUrl = getCroppedImage();
+    let exportCanvas = document.createElement('canvas');
+    let ctx = exportCanvas.getContext('2d');
+
+    let img = document.getElementById('image-to-crop');
+    let scaleFactorX = img.naturalWidth / img.width;
+    let scaleFactorY = img.naturalHeight / img.height;
+
+    let cropAreaHeight = $('#crop-area').height();
+    exportCanvas.width = EXPORT_WIDTH;
+    exportCanvas.height = EXPORT_HEIGHT;
+
+    let offset = $('#crop-area').offset();
+    ctx.drawImage(
+      img, scaleFactorX * offset.left, scaleFactorY * offset.top,
+      scaleFactorX * cropAreaHeight, scaleFactorY * cropAreaHeight, 0, 0,
+      EXPORT_WIDTH, EXPORT_HEIGHT
+    );
+    let dataUrl = exportCanvas.toDataURL('image/png');
 
     // Create a link and virtually click it to initiate download
     // https://stackoverflow.com/a/21210576
