@@ -7,7 +7,7 @@ function resetHandles() {
   $('.resize-handle').draggable('option', 'containment', '#image-to-crop');
 }
 
-function initHandles() {
+export default function initHandles() {
   $('#crop-area').append($('<div/>', {class: 'resize-handle up left'}))
   $('#crop-area').append($('<div/>', {class: 'resize-handle up right'}))
   $('#crop-area').append($('<div/>', {class: 'resize-handle low left'}))

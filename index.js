@@ -1,3 +1,6 @@
+import { importWasm, wasm } from './loadWasm.js'
+import initHandles from './handles.js'
+
 let EXPORT_WIDTH = 1024;
 let EXPORT_HEIGHT = 1024;
 let CROP_CANVAS = document.createElement('canvas');
@@ -115,4 +118,6 @@ function init() {
   initHandles();
 }
 
-window.onload = init
+window.onload = () => {
+  importWasm().then(() => init());
+}
