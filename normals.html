@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+    <canvas id="drawing" width="64" height="64"></canvas>
+
+    <img src="#" id="display" width="64" height="64">
+
+    <script src="loadWasm.js" type="module"></script>
+    <script src="./jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
+    <script src="./jquery-ui-1.12.1.custom/jquery-ui.js"></script>
+    <script type="module">
+      import { importWasm } from './loadWasm.js'
+      import { calculate_normals } from './pkg/texture_looper.js'
+
+      function init() {
+        let c = document.getElementById('drawing');
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.rect(8, 8, 32, 32);
+        ctx.stroke();
+
+        let b64 = document.getElementById('drawing').toDataURL('image/png');
+        let img = document.getElementById('display');
+        console.log('starting...');
+        img.src = calculate_normals(b64);
+        console.log('done...');
+      }
+
+      window.onload = () => {
+        importWasm().then(init);
+      }
+    </script>
+</body>
+</html>

@@ -7,6 +7,6 @@ set -ex
 # support in `wasm-pack` yet. Support will be added soon though!
 
 cargo build --target wasm32-unknown-unknown --release
-wasm-bindgen ./target/wasm32-unknown-unknown/release/texture_looper.wasm --out-dir pkg --web
+wasm-bindgen ./target/wasm32-unknown-unknown/release/texture_looper.wasm --out-dir pkg --web --no-typescript
 
 python3 -m http.server
