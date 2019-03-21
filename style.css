@@ -10,8 +10,8 @@ img {
 #crop-area {
   border: 1px solid black;
   position: absolute;
-  left: calc(100vw / 2.0 - 35vh);
-  top: calc(100vh / 2.0 - 35vh);
+  left: 0;
+  top: 0;
   width: 70vh;
   height: 70vh;
 }

@@ -75,6 +75,8 @@ function getUint32Memory() {
     return cachegetUint32Memory;
 }
 /**
+* Normal map generator
+* Algorithm from: http://jon-martin.com/?p=123
 * @param {string} arg0
 * @returns {string}
 */

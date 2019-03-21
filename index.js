@@ -1,4 +1,5 @@
-import { importWasm, wasm } from './loadWasm.js'
+import { importWasm } from './loadWasm.js'
+import { normal_map as calculateNormalMap } from './pkg/texture_looper.js'
 import initHandles from './handles.js'
 
 let EXPORT_WIDTH = 1024;
@@ -33,6 +34,28 @@ function getCroppedImage() {
   let offset = $('#crop-area').offset();
   ctx.drawImage(img, scaleFactorX * -offset.left, scaleFactorY * -offset.top);
   return CROP_CANVAS.toDataURL('image/png');
+}
+
+// Returns data URL to canvas with size EXPORT_WIDTH, EXPORT_HEIGHT
+function getCroppedImageToSave() {
+  let exportCanvas = document.createElement('canvas');
+  let ctx = exportCanvas.getContext('2d');
+
+  let img = document.getElementById('image-to-crop');
+  let scaleFactorX = img.naturalWidth / img.width;
+  let scaleFactorY = img.naturalHeight / img.height;
+
+  let cropAreaHeight = $('#crop-area').height();
+  exportCanvas.width = EXPORT_WIDTH;
+  exportCanvas.height = EXPORT_HEIGHT;
+
+  let offset = $('#crop-area').offset();
+  ctx.drawImage(
+    img, scaleFactorX * offset.left, scaleFactorY * offset.top,
+    scaleFactorX * cropAreaHeight, scaleFactorY * cropAreaHeight, 0, 0,
+    EXPORT_WIDTH, EXPORT_HEIGHT
+  );
+  return exportCanvas.toDataURL('image/png');
 }
 
 function init() {
@@ -85,25 +108,7 @@ function init() {
 
 
   $('button#save').on('click', (evt) => {
-    let exportCanvas = document.createElement('canvas');
-    let ctx = exportCanvas.getContext('2d');
-
-    let img = document.getElementById('image-to-crop');
-    let scaleFactorX = img.naturalWidth / img.width;
-    let scaleFactorY = img.naturalHeight / img.height;
-
-    let cropAreaHeight = $('#crop-area').height();
-    exportCanvas.width = EXPORT_WIDTH;
-    exportCanvas.height = EXPORT_HEIGHT;
-
-    let offset = $('#crop-area').offset();
-    ctx.drawImage(
-      img, scaleFactorX * offset.left, scaleFactorY * offset.top,
-      scaleFactorX * cropAreaHeight, scaleFactorY * cropAreaHeight, 0, 0,
-      EXPORT_WIDTH, EXPORT_HEIGHT
-    );
-    let dataUrl = exportCanvas.toDataURL('image/png');
-
+    let dataUrl = getCroppedImageToSave();
     // Create a link and virtually click it to initiate download
     // https://stackoverflow.com/a/21210576
     var link = document.createElement('a');
@@ -114,10 +119,24 @@ function init() {
     document.body.removeChild(link);
   });
 
+  $('button#save-normal-map').on('click', (evt) => {
+    let dataUrl = getCroppedImageToSave();
+    let normalMapData = calculateNormalMap(dataUrl);
+
+    // Create a link and virtually click it to initiate download
+    // https://stackoverflow.com/a/21210576
+    var link = document.createElement('a');
+    link.href = normalMapData;
+    link.download = 'normal-map.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
   // Setup the resizing handles
   initHandles();
 }
 
 window.onload = () => {
-  importWasm().then(() => init());
+  importWasm().then(init);
 }
