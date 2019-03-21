@@ -7,6 +7,23 @@ img {
   font-size: 30pt;
 }
 
+#drag-n-drop {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #999;
+  z-index: 1;
+  text-align: center;
+}
+
+#drag-n-drop * {
+  top: 50vh;
+  font-size: 30px;
+}
+
 #crop-area {
   border: 1px solid black;
   position: absolute;

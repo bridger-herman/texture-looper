@@ -18,6 +18,13 @@ function setCropContainment() {
   $('#crop-area').draggable('option', 'containment', '#image-to-crop');
 }
 
+function setImage(fileEvent) {
+  setCropBackground(fileEvent.target.result);
+
+  // Store the base64 image data
+  sessionStorage.setItem('imgData', fileEvent.target.result);
+}
+
 // Returns data URL to updated cropped image
 function getCroppedImage() {
   let ctx = CROP_CANVAS.getContext('2d');
@@ -71,12 +78,7 @@ function init() {
     }
 
     let reader = new FileReader();
-    $(reader).on('load', (fileEvent) => {
-      setCropBackground(fileEvent.target.result);
-
-      // Store the base64 image data
-      sessionStorage.setItem('imgData', fileEvent.target.result);
-    });
+    $(reader).on('load', setImage);
     reader.readAsDataURL(evt.target.files[0]);
   });
 
@@ -135,6 +137,26 @@ function init() {
 
   // Setup the resizing handles
   initHandles();
+
+  // Setup file drag/drop
+  $('body').on('drop', (evt) => {
+    evt.preventDefault();
+    $('#drag-n-drop').css('display', 'none');
+    let e = evt.originalEvent;
+    if (!e.dataTransfer.files || !e.dataTransfer.files[0]) {
+      alert('No files uploaded!');
+      return;
+    }
+
+    let reader = new FileReader();
+    $(reader).on('load', setImage);
+    reader.readAsDataURL(e.dataTransfer.files[0]);
+  });
+  $('body').on('dragover', (evt) => {
+    evt.preventDefault();
+    $('#drag-n-drop').css('display', 'block');
+    $('#drag-n-drop').css('background-color', 'white');
+  });
 }
 
 window.onload = () => {
