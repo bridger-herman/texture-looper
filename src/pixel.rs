@@ -98,6 +98,18 @@ pub struct Pixel {
     pub with_clamping: bool,
 }
 
+impl Default for Pixel {
+    fn default() -> Self {
+        Self {
+            r: 0.0,
+            g: 0.0,
+            b: 0.0,
+            a: 1.0,
+            with_clamping: true,
+        }
+    }
+}
+
 impl Pixel {
     pub fn from_slice_unclamped(numbers: &[f64]) -> Self {
         Self {
@@ -206,6 +218,18 @@ impl Pixel {
             a: raw.a,
         };
         Pixel::from(raw_quant)
+    }
+
+    /// Turn a pixel into grayscale, using its luminance
+    pub fn grayscale(&self) -> Self {
+        let lum = self.luminance();
+        Self {
+            r: lum,
+            g: lum,
+            b: lum,
+            a: self.a,
+            with_clamping: true,
+        }
     }
 }
 

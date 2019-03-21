@@ -78,11 +78,11 @@ function getUint32Memory() {
 * @param {string} arg0
 * @returns {string}
 */
-export function calculate_normals(arg0) {
+export function normal_map(arg0) {
     const ptr0 = passStringToWasm(arg0);
     const len0 = WASM_VECTOR_LEN;
     const retptr = globalArgumentPtr();
-    wasm.calculate_normals(retptr, ptr0, len0);
+    wasm.normal_map(retptr, ptr0, len0);
     const mem = getUint32Memory();
     const rustptr = mem[retptr / 4];
     const rustlen = mem[retptr / 4 + 1];
@@ -93,7 +93,7 @@ export function calculate_normals(arg0) {
 
 }
 
-__exports.calculate_normals = calculate_normals;
+__exports.normal_map = normal_map;
 
 const heap = new Array(32);
 

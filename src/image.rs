@@ -34,12 +34,7 @@ impl Image {
     pub fn new(width: usize, height: usize) -> Self {
         Self {
             pixels: vec![
-                RawPixel {
-                    r: 0,
-                    g: 0,
-                    b: 0,
-                    a: 0
-                };
+                RawPixel::default();
                 width * height
             ],
             width,
