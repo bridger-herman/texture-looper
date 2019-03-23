@@ -77,11 +77,11 @@ function getUint32Memory() {
 /**
 * Normal map generator
 * Algorithm from: http://jon-martin.com/?p=123
-* @param {string} arg0
+* @param {string} b64_image
 * @returns {string}
 */
-export function normal_map(arg0) {
-    const ptr0 = passStringToWasm(arg0);
+export function normal_map(b64_image) {
+    const ptr0 = passStringToWasm(b64_image);
     const len0 = WASM_VECTOR_LEN;
     const retptr = globalArgumentPtr();
     wasm.normal_map(retptr, ptr0, len0);
@@ -118,13 +118,7 @@ __exports.__wbindgen_object_drop_ref = __wbindgen_object_drop_ref;
 function init(module_or_path, maybe_memory) {
     let result;
     const imports = { './texture_looper': __exports };
-    if (module_or_path instanceof WebAssembly.Module) {
-
-        result = WebAssembly.instantiate(module_or_path, imports)
-        .then(instance => {
-            return { instance, module: module_or_path };
-        });
-    } else {
+    if (module_or_path instanceof URL || typeof module_or_path === 'string' || module_or_path instanceof Request) {
 
         const response = fetch(module_or_path);
         if (typeof WebAssembly.instantiateStreaming === 'function') {
@@ -140,6 +134,12 @@ function init(module_or_path, maybe_memory) {
             .then(r => r.arrayBuffer())
             .then(bytes => WebAssembly.instantiate(bytes, imports));
         }
+    } else {
+
+        result = WebAssembly.instantiate(module_or_path, imports)
+        .then(instance => {
+            return { instance, module: module_or_path };
+        });
     }
     return result.then(({instance, module}) => {
         wasm = instance.exports;

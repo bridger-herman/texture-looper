@@ -23,6 +23,8 @@ function setImage(fileEvent) {
 
   // Store the base64 image data
   sessionStorage.setItem('imgData', fileEvent.target.result);
+
+  $('#drag-n-drop').css('display', 'none');
 }
 
 // Returns data URL to updated cropped image
@@ -141,7 +143,6 @@ function init() {
   // Setup file drag/drop
   $('body').on('drop', (evt) => {
     evt.preventDefault();
-    $('#drag-n-drop').css('display', 'none');
     let e = evt.originalEvent;
     if (!e.dataTransfer.files || !e.dataTransfer.files[0]) {
       alert('No files uploaded!');
