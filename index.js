@@ -71,6 +71,7 @@ function init() {
   // Try to load the image url from storage (don't lose data over refresh)
   if (sessionStorage['imgData'] != null) {
     setCropBackground(sessionStorage['imgData']);
+    $('#drag-n-drop').css('display', 'none');
   }
 
   $('#file-upload').on('change', (evt) => {

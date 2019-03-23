@@ -8,18 +8,8 @@ use std::io::{BufReader, BufWriter};
 
 use base64;
 use png::HasParameters;
-use wasm_bindgen::prelude::*;
 
 use crate::pixel::{Pixel, RawPixel};
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen]
-    pub fn alert(s: &str);
-
-    #[wasm_bindgen(js_namespace = console)]
-    pub fn log(s: &str);
-}
 
 /// A struct representing a collection of pixels
 #[derive(Debug, Clone)]
@@ -33,10 +23,7 @@ pub struct Image {
 impl Image {
     pub fn new(width: usize, height: usize) -> Self {
         Self {
-            pixels: vec![
-                RawPixel::default();
-                width * height
-            ],
+            pixels: vec![RawPixel::default(); width * height],
             width,
             height,
         }
@@ -47,14 +34,16 @@ impl Image {
             png::ColorType::RGB => 3,
             png::ColorType::RGBA => 4,
             _ => {
-                alert("Unsupported image type");
-                panic!("Unsupported image type");
+                error!("Unsupported image color");
+                panic!("Unsupported image color");
             }
         };
 
         let mut raw_pixels =
             vec![RawPixel::default(); (info.width * info.height) as usize];
-        for (raw_index, byte_index) in (0..bytes.len()).step_by(step).enumerate() {
+        for (raw_index, byte_index) in
+            (0..bytes.len()).step_by(step).enumerate()
+        {
             if step == 3 {
                 raw_pixels[raw_index] = RawPixel {
                     r: bytes[byte_index],

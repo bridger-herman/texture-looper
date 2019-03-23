@@ -11,3 +11,5 @@ crate-type = ["cdylib"]
 wasm-bindgen = "0.2"
 base64 = "0.10"
 png = "0.14"
+wasm-logger = { git = "https://github.com/bridger-herman/wasm-logger" }
+log = "0.4"
