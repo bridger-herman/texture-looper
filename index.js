@@ -2,84 +2,8 @@ import { importWasm } from './loadWasm.js'
 import { normal_map as calculateNormalMap } from './pkg/texture_looper.js'
 import initHandles from './handles.js'
 import { updateActiveThumbnail, createThumbnailSelector } from './thumbnail.js'
-
-let EXPORT_WIDTH = 1024;
-let EXPORT_HEIGHT = 1024;
-let CROP_CANVAS = document.createElement('canvas');
-
-function setCropBackground(data) {
-  $('#image-to-crop').attr('src', data);
-  $('#image-to-crop').css({
-    'height': '100vh',
-    'width': 'auto',
-  });
-}
-
-function setCropContainment() {
-  $('#crop-area').draggable('option', 'containment', '#image-to-crop');
-}
-
-function setImage(fileEvent) {
-  setCropBackground(fileEvent.target.result);
-
-  // Store the base64 image data
-  let currentImg;
-  if (sessionStorage['currentImg']) {
-    let imgs = JSON.parse(sessionStorage['imgData']);
-    imgs.push(fileEvent.target.result);
-    sessionStorage['imgData'] = JSON.stringify(imgs);
-    currentImg = imgs.length - 1;
-  } else {
-    let arr = [fileEvent.target.result];
-    currentImg = 0;
-    sessionStorage.setItem('imgData', JSON.stringify(arr));
-  }
-  sessionStorage.setItem('currentImg', currentImg);
-
-  // $('#drag-n-drop').css('display', 'none');
-  $('#texture-list').prepend(createThumbnailSelector(currentImg, fileEvent.target.result));
-  updateActiveThumbnail();
-}
-
-// Returns data URL to updated cropped image
-function getCroppedImage() {
-  let ctx = CROP_CANVAS.getContext('2d');
-  ctx.clearRect(0, 0, CROP_CANVAS.width, CROP_CANVAS.height);
-
-  let img = document.getElementById('image-to-crop');
-  let scaleFactorX = img.naturalWidth / img.width;
-  let scaleFactorY = img.naturalHeight / img.height;
-
-  let cropAreaHeight = $('#crop-area').height();
-  CROP_CANVAS.width = scaleFactorX * cropAreaHeight;
-  CROP_CANVAS.height = scaleFactorY * cropAreaHeight;
-
-  let offset = $('#crop-area').offset();
-  ctx.drawImage(img, scaleFactorX * -offset.left, scaleFactorY * -offset.top);
-  return CROP_CANVAS.toDataURL('image/png');
-}
-
-// Returns data URL to canvas with size EXPORT_WIDTH, EXPORT_HEIGHT
-function getCroppedImageToSave() {
-  let exportCanvas = document.createElement('canvas');
-  let ctx = exportCanvas.getContext('2d');
-
-  let img = document.getElementById('image-to-crop');
-  let scaleFactorX = img.naturalWidth / img.width;
-  let scaleFactorY = img.naturalHeight / img.height;
-
-  let cropAreaHeight = $('#crop-area').height();
-  exportCanvas.width = EXPORT_WIDTH;
-  exportCanvas.height = EXPORT_HEIGHT;
-
-  let offset = $('#crop-area').offset();
-  ctx.drawImage(
-    img, scaleFactorX * offset.left, scaleFactorY * offset.top,
-    scaleFactorX * cropAreaHeight, scaleFactorY * cropAreaHeight, 0, 0,
-    EXPORT_WIDTH, EXPORT_HEIGHT
-  );
-  return exportCanvas.toDataURL('image/png');
-}
+import { setCropBackground, setCropContainment, setImage, getCroppedImage,
+  getCroppedImageToSave, updateCropMask } from './crop.js'
 
 function init() {
   // Try to load the image url from storage (don't lose data over refresh)
@@ -102,7 +26,7 @@ function init() {
     }
 
     let reader = new FileReader();
-    $(reader).on('load', setImage);
+    $(reader).on('load', (evt) => setImage(evt.target.result));
     reader.readAsDataURL(evt.target.files[0]);
   });
 
@@ -116,20 +40,12 @@ function init() {
     $('.crop-mask').css('background-image', 'none');
   });
   $('#crop-area').on('dragstop', (evt) => {
-    if (document.getElementById('show-repeat-preview').checked) {
-      $('.crop-mask').css('background-image', 'url(' + getCroppedImage() + ')');
-    } else {
-      $('.crop-mask').css('background-image', 'none');
-    }
+    updateCropMask();
   });
 
   // Set up the repeat preview checkbox
   $('#show-repeat-preview').on('change', (evt) => {
-    if (evt.target.checked) {
-      $('.crop-mask').css('background-image', 'url(' + getCroppedImage() + ')');
-    } else {
-      $('.crop-mask').css('background-image', 'none');
-    }
+    updateCropMask();
   });
 
   $('button#save').on('click', (evt) => {
@@ -171,7 +87,7 @@ function init() {
     }
 
     let reader = new FileReader();
-    $(reader).on('load', setImage);
+    $(reader).on('load', () => setImage(evt.target.result));
     reader.readAsDataURL(e.dataTransfer.files[0]);
   });
   $('body').on('dragover', (evt) => {
