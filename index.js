@@ -1,6 +1,7 @@
 import { importWasm } from './loadWasm.js'
 import { normal_map as calculateNormalMap } from './pkg/texture_looper.js'
 import initHandles from './handles.js'
+import { updateActiveThumbnail, createThumbnailSelector } from './thumbnail.js'
 
 let EXPORT_WIDTH = 1024;
 let EXPORT_HEIGHT = 1024;
@@ -22,9 +23,22 @@ function setImage(fileEvent) {
   setCropBackground(fileEvent.target.result);
 
   // Store the base64 image data
-  sessionStorage.setItem('imgData', fileEvent.target.result);
+  let currentImg;
+  if (sessionStorage['currentImg']) {
+    let imgs = JSON.parse(sessionStorage['imgData']);
+    imgs.push(fileEvent.target.result);
+    sessionStorage['imgData'] = JSON.stringify(imgs);
+    currentImg = imgs.length - 1;
+  } else {
+    let arr = [fileEvent.target.result];
+    currentImg = 0;
+    sessionStorage.setItem('imgData', JSON.stringify(arr));
+  }
+  sessionStorage.setItem('currentImg', currentImg);
 
-  $('#drag-n-drop').css('display', 'none');
+  // $('#drag-n-drop').css('display', 'none');
+  $('#texture-list').prepend(createThumbnailSelector(currentImg, fileEvent.target.result));
+  updateActiveThumbnail();
 }
 
 // Returns data URL to updated cropped image
@@ -69,9 +83,16 @@ function getCroppedImageToSave() {
 
 function init() {
   // Try to load the image url from storage (don't lose data over refresh)
-  if (sessionStorage['imgData'] != null) {
-    setCropBackground(sessionStorage['imgData']);
-    $('#drag-n-drop').css('display', 'none');
+  if (sessionStorage['currentImg']) {
+    let imgs = JSON.parse(sessionStorage['imgData']);
+    setCropBackground(imgs[sessionStorage['currentImg']]);
+
+    for (let i in imgs) {
+      $('#texture-list').prepend(createThumbnailSelector(i, imgs[i]));
+    }
+
+    updateActiveThumbnail();
+    // $('#drag-n-drop').css('display', 'none');
   }
 
   $('#file-upload').on('change', (evt) => {
@@ -110,7 +131,6 @@ function init() {
       $('.crop-mask').css('background-image', 'none');
     }
   });
-
 
   $('button#save').on('click', (evt) => {
     let dataUrl = getCroppedImageToSave();
@@ -156,8 +176,8 @@ function init() {
   });
   $('body').on('dragover', (evt) => {
     evt.preventDefault();
-    $('#drag-n-drop').css('display', 'block');
-    $('#drag-n-drop').css('background-color', 'white');
+    // $('#drag-n-drop').css('display', 'block');
+    // $('#drag-n-drop').css('background-color', 'white');
   });
 }
 

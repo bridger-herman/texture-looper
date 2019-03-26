@@ -43,7 +43,7 @@ img {
   right: 0;
   top: 0;
   width: 15vw;
-  height: 100vw;
+  height: 100vh;
   background: #eee;
   z-index: 1;
   padding: 10px 20px;
@@ -105,4 +105,37 @@ img {
 }
 .resize-handle.low {
   top: calc(100% - 10px);
+}
+
+.texture-chooser {
+  position: fixed;
+  right: calc(15vw + 40px);
+  top: 0;
+  width: 10vw;
+  height: 100vh;
+  background: #bbb;
+  z-index: 1;
+  margin: 0;
+}
+
+.texture-chooser ul {
+  padding: 0 10px;
+  list-style-type: none;
+}
+
+.texture-chooser li.texture-thumb {
+  border-bottom: 1px solid black;
+}
+
+.texture-chooser li.texture-thumb.active {
+  border: 2px solid white;
+}
+
+.texture-chooser li.texture-thumb:hover {
+  background-color: white;
+}
+
+.texture-chooser li * {
+  display: inline-block;
+  padding: 5px;
 }
