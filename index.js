@@ -95,6 +95,15 @@ function init() {
     // $('#drag-n-drop').css('display', 'block');
     // $('#drag-n-drop').css('background-color', 'white');
   });
+
+  // Set up saving for project name
+  $('#project-name').on('keyup', (evt) => {
+    evt.target.style.borderColor = 'black';
+    sessionStorage.setItem('projectName', evt.target.value);
+    setTimeout(() => {
+      evt.target.style.borderColor = '#9ea';
+    }, 500);
+  });
 }
 
 window.onload = () => {
