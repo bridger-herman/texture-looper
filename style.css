@@ -115,7 +115,7 @@ img {
   top: 0;
   width: 10vw;
   height: 100vh;
-  background: #bbb;
+  background: #ccc;
   z-index: 1;
   margin: 0;
 }
@@ -149,5 +149,10 @@ img {
 
 #normal-map-preview {
   width: 90%;
+  height: auto;
+}
+
+.thumb-preview {
+  width: 40%;
   height: auto;
 }

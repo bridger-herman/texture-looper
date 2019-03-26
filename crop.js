@@ -25,10 +25,10 @@ export function setCropBackground(index) {
 export function setCropNormalMap() {
   let img = document.getElementById('image-to-crop');
   if (img.complete && img.naturalHeight !== 0) {
-    loadNormalMapToImage();
+    loadNormalMapToImage(sessionStorage['currentImg']);
   } else {
     $('#image-to-crop').on('load', () => {
-      loadNormalMapToImage();
+      loadNormalMapToImage(sessionStorage['currentImg']);
       $('#image-to-crop').off('load');
     });
   }
@@ -42,6 +42,7 @@ export function setCropContainment() {
 export function setImage(imgData) {
   // Store the base64 image data
   let currentImg;
+  let normData;
   if (sessionStorage['currentImg']) {
     let imgs = JSON.parse(sessionStorage['imgData']);
     imgs.push(imgData);
@@ -49,7 +50,7 @@ export function setImage(imgData) {
 
     let imgNorms = JSON.parse(sessionStorage['normalMaps']);
     console.log('starting image norm calc...');
-    let normData = calculateNormalMap(imgData);
+    normData = calculateNormalMap(imgData);
     console.log('finished');
     imgNorms.push(normData);
     sessionStorage['normalMaps'] = JSON.stringify(imgNorms);
@@ -60,7 +61,8 @@ export function setImage(imgData) {
     sessionStorage.setItem('imgData', JSON.stringify(arr));
 
     console.log('starting first calc...');
-    let normArr = [calculateNormalMap(imgData)];
+    normData = calculateNormalMap(imgData);
+    let normArr = [normData];
     console.log('finished first calc...');
     sessionStorage.setItem('normalMaps', JSON.stringify(normArr));
   }
@@ -69,7 +71,7 @@ export function setImage(imgData) {
   setCropNormalMap();
 
   // $('#drag-n-drop').css('display', 'none');
-  $('#texture-list').prepend(createThumbnailSelector(currentImg, imgData));
+  $('#texture-list').prepend(createThumbnailSelector(currentImg, imgData, normData));
   updateActiveThumbnail();
 }
 
@@ -92,7 +94,7 @@ export function getCroppedImage() {
 }
 
 // Sets the image preview for the normal map
-function loadNormalMapToImage() {
+function loadNormalMapToImage(imgIndex) {
   let ctx = NORM_CANVAS.getContext('2d');
   ctx.clearRect(0, 0, NORM_CANVAS.width, NORM_CANVAS.height);
 
@@ -122,9 +124,15 @@ function loadNormalMapToImage() {
 }
 
 // Returns data URL to canvas with size EXPORT_WIDTH, EXPORT_HEIGHT
-export function getCroppedImageToSave() {
+export function getCroppedImageToSave(gradIndex, imgType) {
   let exportCanvas = document.createElement('canvas');
   let ctx = exportCanvas.getContext('2d');
+
+  let imgs = JSON.parse(sessionStorage[imgType]);
+  let cropImgData = imgs[gradIndex];
+  let croppedImg = document.createElement('img');
+  croppedImg.src = cropImgData;
+  document.body.appendChild(croppedImg);
 
   let img = document.getElementById('image-to-crop');
   let scaleFactorX = img.naturalWidth / img.width;
@@ -136,10 +144,11 @@ export function getCroppedImageToSave() {
 
   let offset = $('#crop-area').offset();
   ctx.drawImage(
-    img, scaleFactorX * offset.left, scaleFactorY * offset.top,
+    croppedImg, scaleFactorX * offset.left, scaleFactorY * offset.top,
     scaleFactorX * cropAreaHeight, scaleFactorY * cropAreaHeight, 0, 0,
     EXPORT_WIDTH, EXPORT_HEIGHT
   );
+  // document.body.removeChild(croppedImg);
   return exportCanvas.toDataURL('image/png');
 }
 
@@ -158,17 +167,15 @@ function thumnailClickable(el) {
   });
 }
 
-export function createThumbnailSelector(index, imgData) {
+export function createThumbnailSelector(index, imgData, normData) {
   let el = $('<li/>', {
     class: 'texture-thumb',
     id: 'texture-thumb-' + index,
-  }).append($('<img/>', {
-    src: imgData,
-    css: {
-      width: '30%',
-      height: 'auto',
-    }
-  })).append($('<p/>', {text: 'GRAD-' + index}));
+  }).append($('<div/>')
+    .append($('<img/>', {class: 'thumb-preview', src: imgData}))
+    .append($('<img/>', {class: 'thumb-preview', src: normData}))
+  )
+    .append($('<p/>', {text: 'GRAD-' + index}));
 
   thumnailClickable(el);
   return el;

@@ -10,8 +10,10 @@ function init() {
     let imgs = JSON.parse(sessionStorage['imgData']);
     setCropBackground(sessionStorage['currentImg']);
 
+    let norms = JSON.parse(sessionStorage['normalMaps']);
+
     for (let i in imgs) {
-      $('#texture-list').prepend(createThumbnailSelector(i, imgs[i]));
+      $('#texture-list').prepend(createThumbnailSelector(i, imgs[i], norms[i]));
     }
 
     updateActiveThumbnail();
@@ -49,30 +51,41 @@ function init() {
     updateCropMask();
   });
 
-  $('button#save').on('click', (evt) => {
-    let dataUrl = getCroppedImageToSave();
-    // Create a link and virtually click it to initiate download
-    // https://stackoverflow.com/a/21210576
-    var link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = 'texture.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  });
+  $('button#export').on('click', (evt) => {
+    let zip = new JSZip();
 
-  $('button#save-normal-map').on('click', (evt) => {
-    let dataUrl = getCroppedImageToSave();
-    let normalMapData = calculateNormalMap(dataUrl);
+    // Add the color images
+    let imgs = JSON.parse(sessionStorage['imgData']);
+    for (let i in imgs) {
+      let dataUrl = getCroppedImageToSave(i, 'imgData');
+      // Strip off the leading "data:image/png;base64,"
+      dataUrl = dataUrl.substring(22);
+      zip.file($('#project-name').attr('value') + '_GRAD-' + i + '_COLOR.png',
+        dataUrl, {base64: true});
+    }
 
-    // Create a link and virtually click it to initiate download
-    // https://stackoverflow.com/a/21210576
-    var link = document.createElement('a');
-    link.href = normalMapData;
-    link.download = 'normal-map.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Add the normal maps
+    let normalMaps = JSON.parse(sessionStorage['normalMaps']);
+    for (let i in normalMaps) {
+      let dataUrl = getCroppedImageToSave(i, 'normalMaps');
+      // Strip off the leading "data:image/png;base64,"
+      dataUrl = dataUrl.substring(22);
+      zip.file($('#project-name').attr('value') + '_GRAD-' + i + '_NRM.png',
+        dataUrl, {base64: true});
+    }
+
+    zip.generateAsync({type: 'base64'})
+      .then((content) => {
+        // Create a link and virtually click it to initiate download
+        // https://stackoverflow.com/a/21210576
+        var link = document.createElement('a');
+        link.href = 'data:applization/zip;base64,' + content;
+        link.download = $('#project-name').attr('value') + '.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
   });
 
   // Setup the resizing handles
@@ -98,6 +111,7 @@ function init() {
   });
 
   // Set up saving for project name
+  sessionStorage.setItem('projectName', $('#project-name').attr('value'));
   $('#project-name').on('keyup', (evt) => {
     evt.target.style.borderColor = 'black';
     sessionStorage.setItem('projectName', evt.target.value);
