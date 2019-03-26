@@ -1,21 +1,21 @@
 import { importWasm } from './loadWasm.js'
-import { normal_map as calculateNormalMap } from './pkg/texture_looper.js'
 import initHandles from './handles.js'
-import { updateActiveThumbnail, createThumbnailSelector } from './thumbnail.js'
-import { setCropBackground, setCropContainment, setImage, getCroppedImage,
-  getCroppedImageToSave, updateCropMask } from './crop.js'
+import { updateActiveThumbnail, setCropBackground, setCropContainment,
+  setImage, getCroppedImage, getCroppedImageToSave, updateCropMask,
+  createThumbnailSelector, setCropNormalMap } from './crop.js'
 
 function init() {
   // Try to load the image url from storage (don't lose data over refresh)
   if (sessionStorage['currentImg']) {
     let imgs = JSON.parse(sessionStorage['imgData']);
-    setCropBackground(imgs[sessionStorage['currentImg']]);
+    setCropBackground(sessionStorage['currentImg']);
 
     for (let i in imgs) {
       $('#texture-list').prepend(createThumbnailSelector(i, imgs[i]));
     }
 
     updateActiveThumbnail();
+    setCropNormalMap();
     // $('#drag-n-drop').css('display', 'none');
   }
 
@@ -41,6 +41,7 @@ function init() {
   });
   $('#crop-area').on('dragstop', (evt) => {
     updateCropMask();
+    setCropNormalMap();
   });
 
   // Set up the repeat preview checkbox

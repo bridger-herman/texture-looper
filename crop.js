@@ -1,6 +1,11 @@
-let EXPORT_WIDTH = 1024;
-let EXPORT_HEIGHT = 1024;
+import { normal_map as calculateNormalMap } from './pkg/texture_looper.js'
+
+const EXPORT_WIDTH = 1024;
+const EXPORT_HEIGHT = 1024;
 let CROP_CANVAS = document.createElement('canvas');
+let NORM_CANVAS = document.createElement('canvas');
+NORM_CANVAS.width = EXPORT_WIDTH;
+NORM_CANVAS.height = EXPORT_HEIGHT;
 
 export function updateCropMask() {
   if (document.getElementById('show-repeat-preview').checked) {
@@ -10,13 +15,23 @@ export function updateCropMask() {
   }
 }
 
-// Set the image background from some image data
-export function setCropBackground(data) {
-  $('#image-to-crop').attr('src', data);
-  $('#image-to-crop').css({
-    'height': '100vh',
-    'width': 'auto',
-  });
+// Set the image background based on its index
+export function setCropBackground(index) {
+  let imgs = JSON.parse(sessionStorage['imgData']);
+  let currentImgData = imgs[index];
+  $('#image-to-crop').attr('src', currentImgData);
+}
+
+export function setCropNormalMap() {
+  let img = document.getElementById('image-to-crop');
+  if (img.complete && img.naturalHeight !== 0) {
+    loadNormalMapToImage();
+  } else {
+    $('#image-to-crop').on('load', () => {
+      loadNormalMapToImage();
+      $('#image-to-crop').off('load');
+    });
+  }
 }
 
 export function setCropContainment() {
@@ -25,21 +40,33 @@ export function setCropContainment() {
 
 // Set the image background from a newly uploaded image
 export function setImage(imgData) {
-  setCropBackground(imgData);
-
   // Store the base64 image data
   let currentImg;
   if (sessionStorage['currentImg']) {
     let imgs = JSON.parse(sessionStorage['imgData']);
     imgs.push(imgData);
     sessionStorage['imgData'] = JSON.stringify(imgs);
+
+    let imgNorms = JSON.parse(sessionStorage['normalMaps']);
+    console.log('starting image norm calc...');
+    let normData = calculateNormalMap(imgData);
+    console.log('finished');
+    imgNorms.push(normData);
+    sessionStorage['normalMaps'] = JSON.stringify(imgNorms);
     currentImg = imgs.length - 1;
   } else {
     let arr = [imgData];
     currentImg = 0;
     sessionStorage.setItem('imgData', JSON.stringify(arr));
+
+    console.log('starting first calc...');
+    let normArr = [calculateNormalMap(imgData)];
+    console.log('finished first calc...');
+    sessionStorage.setItem('normalMaps', JSON.stringify(normArr));
   }
   sessionStorage.setItem('currentImg', currentImg);
+  setCropBackground(currentImg);
+  setCropNormalMap();
 
   // $('#drag-n-drop').css('display', 'none');
   $('#texture-list').prepend(createThumbnailSelector(currentImg, imgData));
@@ -64,6 +91,36 @@ export function getCroppedImage() {
   return CROP_CANVAS.toDataURL('image/png');
 }
 
+// Sets the image preview for the normal map
+function loadNormalMapToImage() {
+  let ctx = NORM_CANVAS.getContext('2d');
+  ctx.clearRect(0, 0, NORM_CANVAS.width, NORM_CANVAS.height);
+
+  let normMaps = JSON.parse(sessionStorage['normalMaps']);
+  let currentNormalMapData = normMaps[sessionStorage['currentImg']];
+  let normImg = document.createElement('img');
+
+  $(normImg).on('load', () => {
+    $(normImg).off('load');
+    let img = document.getElementById('image-to-crop');
+    let scaleFactorX = img.naturalWidth / img.width;
+    let scaleFactorY = img.naturalHeight / img.height;
+
+    let cropAreaHeight = $('#crop-area').height();
+
+    let offset = $('#crop-area').offset();
+    ctx.drawImage(
+      normImg, scaleFactorX * offset.left, scaleFactorY * offset.top,
+      scaleFactorX * cropAreaHeight, scaleFactorY * cropAreaHeight, 0, 0,
+      EXPORT_WIDTH, EXPORT_HEIGHT
+    );
+    let data = NORM_CANVAS.toDataURL('image/png');
+    document.getElementById('normal-map-preview').src = data;
+  });
+
+  normImg.src = currentNormalMapData;
+}
+
 // Returns data URL to canvas with size EXPORT_WIDTH, EXPORT_HEIGHT
 export function getCroppedImageToSave() {
   let exportCanvas = document.createElement('canvas');
@@ -86,4 +143,42 @@ export function getCroppedImageToSave() {
   return exportCanvas.toDataURL('image/png');
 }
 
+function thumnailClickable(el) {
+  $(el).on('click', (evt) => {
+    let texThumbId = $(evt.target).parents('.texture-thumb').attr('id') || evt.target.id;
+    let sliceIndex = texThumbId.lastIndexOf('-'); // Should be texture-thumb-<NUMBER>
+    let imageIndex = texThumbId.substring(sliceIndex + 1);
+    sessionStorage['currentImg'] = imageIndex;
+    updateActiveThumbnail();
 
+    setCropBackground(imageIndex);
+    setCropNormalMap();
+
+    updateCropMask();
+  });
+}
+
+export function createThumbnailSelector(index, imgData) {
+  let el = $('<li/>', {
+    class: 'texture-thumb',
+    id: 'texture-thumb-' + index,
+  }).append($('<img/>', {
+    src: imgData,
+    css: {
+      width: '30%',
+      height: 'auto',
+    }
+  })).append($('<p/>', {text: 'GRAD-' + index}));
+
+  thumnailClickable(el);
+  return el;
+}
+
+export function updateActiveThumbnail() {
+  $('.texture-thumb').removeClass('active');
+  $('.texture-thumb').each((index, el) => {
+    if (el.id.includes(sessionStorage['currentImg'])) {
+      $(el).addClass('active');
+    }
+  });
+}

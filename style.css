@@ -36,6 +36,8 @@ img {
 #image-to-crop {
   border: 1px solid black;
   z-index: -1;
+  height: 100vh;
+  width: auto;
 }
 
 .ui {
@@ -143,4 +145,9 @@ img {
 #project-name {
   border-width: 2px;
   border-color: black;
+}
+
+#normal-map-preview {
+  width: 90%;
+  height: auto;
 }
