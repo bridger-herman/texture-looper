@@ -60,7 +60,7 @@ function init() {
       let dataUrl = getCroppedImageToSave(i, 'imgData');
       // Strip off the leading "data:image/png;base64,"
       dataUrl = dataUrl.substring(22);
-      zip.file($('#project-name').attr('value') + '_GRAD-' + i + '_COLOR.png',
+      zip.file(sessionStorage['projectName'] + '_GRAD-' + i + '_COLOR.png',
         dataUrl, {base64: true});
     }
 
@@ -70,7 +70,7 @@ function init() {
       let dataUrl = getCroppedImageToSave(i, 'normalMaps');
       // Strip off the leading "data:image/png;base64,"
       dataUrl = dataUrl.substring(22);
-      zip.file($('#project-name').attr('value') + '_GRAD-' + i + '_NRM.png',
+      zip.file(sessionStorage['projectName'] + '_GRAD-' + i + '_NRM.png',
         dataUrl, {base64: true});
     }
 
@@ -80,7 +80,7 @@ function init() {
         // https://stackoverflow.com/a/21210576
         var link = document.createElement('a');
         link.href = 'data:applization/zip;base64,' + content;
-        link.download = $('#project-name').attr('value') + '.zip';
+        link.download = sessionStorage['projectName'] + '.zip';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
