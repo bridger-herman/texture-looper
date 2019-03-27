@@ -119,6 +119,13 @@ function init() {
       evt.target.style.borderColor = '#9ea';
     }, 500);
   });
+
+  $('#new-project').on('click', (evt) => {
+    sessionStorage.clear();
+    sessionStorage.setItem('projectName', 'TEXTURE');
+    document.getElementById('project-name').value = 'TEXTURE';
+    window.location.reload();
+  });
 }
 
 window.onload = () => {

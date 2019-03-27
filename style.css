@@ -118,6 +118,7 @@ img {
   background: #ccc;
   z-index: 1;
   margin: 0;
+  overflow: scroll;
 }
 
 .texture-chooser ul {
