@@ -18,7 +18,7 @@ function init() {
 
     updateActiveThumbnail();
     setCropNormalMap();
-    // $('#drag-n-drop').css('display', 'none');
+    $('#drag-n-drop').css('display', 'none');
   }
 
   $('#file-upload').on('change', (evt) => {
@@ -101,13 +101,17 @@ function init() {
     }
 
     let reader = new FileReader();
-    $(reader).on('load', () => setImage(evt.target.result));
+    $(reader).on('load', (evt) => {
+      console.log(evt.target.result);
+      setImage(evt.target.result);
+    });
     reader.readAsDataURL(e.dataTransfer.files[0]);
   });
   $('body').on('dragover', (evt) => {
     evt.preventDefault();
-    // $('#drag-n-drop').css('display', 'block');
-    // $('#drag-n-drop').css('background-color', 'white');
+    $('#drag-n-drop').css('display', 'block');
+    $('#drag-n-drop').css('background-color', 'white');
+    $('#drag-n-drop p').html('Drop image...');
   });
 
   // Set up saving for project name

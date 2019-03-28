@@ -43,36 +43,40 @@ export function setImage(imgData) {
   // Store the base64 image data
   let currentImg;
   let normData;
-  if (sessionStorage['currentImg']) {
-    let imgs = JSON.parse(sessionStorage['imgData']);
-    imgs.push(imgData);
-    sessionStorage['imgData'] = JSON.stringify(imgs);
+  $('#drag-n-drop p').html('Loading...');
+  // Delay a bit to allow the DOM to load
+  setTimeout(() => {
+    if (sessionStorage['currentImg']) {
+      let imgs = JSON.parse(sessionStorage['imgData']);
+      imgs.push(imgData);
+      sessionStorage['imgData'] = JSON.stringify(imgs);
 
-    let imgNorms = JSON.parse(sessionStorage['normalMaps']);
-    console.log('starting image norm calc...');
-    normData = calculateNormalMap(imgData);
-    console.log('finished');
-    imgNorms.push(normData);
-    sessionStorage['normalMaps'] = JSON.stringify(imgNorms);
-    currentImg = imgs.length - 1;
-  } else {
-    let arr = [imgData];
-    currentImg = 0;
-    sessionStorage.setItem('imgData', JSON.stringify(arr));
+      let imgNorms = JSON.parse(sessionStorage['normalMaps']);
+      console.log('starting image norm calc...');
+      normData = calculateNormalMap(imgData);
+      console.log('finished');
+      imgNorms.push(normData);
+      sessionStorage['normalMaps'] = JSON.stringify(imgNorms);
+      currentImg = imgs.length - 1;
+    } else {
+      let arr = [imgData];
+      currentImg = 0;
+      sessionStorage.setItem('imgData', JSON.stringify(arr));
 
-    console.log('starting first calc...');
-    normData = calculateNormalMap(imgData);
-    let normArr = [normData];
-    console.log('finished first calc...');
-    sessionStorage.setItem('normalMaps', JSON.stringify(normArr));
-  }
-  sessionStorage.setItem('currentImg', currentImg);
-  setCropBackground(currentImg);
-  setCropNormalMap();
+      console.log('starting first calc...');
+      normData = calculateNormalMap(imgData);
+      let normArr = [normData];
+      console.log('finished first calc...');
+      sessionStorage.setItem('normalMaps', JSON.stringify(normArr));
+    }
+    $('#drag-n-drop').css('display', 'none');
+    sessionStorage.setItem('currentImg', currentImg);
+    setCropBackground(currentImg);
+    setCropNormalMap();
 
-  // $('#drag-n-drop').css('display', 'none');
-  $('#texture-list').prepend(createThumbnailSelector(currentImg, imgData, normData));
-  updateActiveThumbnail();
+    $('#texture-list').prepend(createThumbnailSelector(currentImg, imgData, normData));
+    updateActiveThumbnail();
+  }, 10);
 }
 
 // Returns data URL to updated cropped image

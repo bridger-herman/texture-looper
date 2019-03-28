@@ -11,7 +11,7 @@ img {
   position: fixed;
   left: 0;
   top: 0;
-  width: 100vw;
+  width: 75vw;
   height: 100vh;
   overflow: hidden;
   background-color: #999;
@@ -118,7 +118,7 @@ img {
   background: #ccc;
   z-index: 1;
   margin: 0;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 
 .texture-chooser ul {
